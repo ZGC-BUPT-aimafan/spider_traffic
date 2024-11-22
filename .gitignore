@@ -9,3 +9,5 @@ data/*
 .DS_Store
 init_program.sh
 .venv
+bin/*
+!bin/.gitkeep
