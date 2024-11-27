@@ -15,7 +15,6 @@ from spider_traffic.traffic.capture import capture
 
 # 定义停止信号的队列
 stop_signal_queue = Queue()
-process = CrawlerProcess(get_project_settings())
 
 
 def stop_crawlers_after_delay(process):
@@ -27,6 +26,7 @@ def stop_crawlers_after_delay(process):
 
 # 启动爬虫
 def start_spider():
+    process = CrawlerProcess(get_project_settings())
     time_limit = int(config["spider"]["time_per_website"])
     # 添加你要运行的爬虫
     process.crawl(Spider)
@@ -35,7 +35,7 @@ def start_spider():
     timer_thread = threading.Timer(
         time_limit, stop_crawlers_after_delay, args=(process,)
     )
-    # timer_thread.daemon = True  # 设置为守护线程
+    timer_thread.daemon = True  # 设置为守护线程
     timer_thread.start()
 
     logger.info(f"开始爬取数据，爬取时间设为{str(time_limit/60)}分钟")
@@ -67,7 +67,7 @@ def traffic(VPS_NAME, PROTOCAL_NAME, SITE_NAME, url):
     formatted_time = current_time.strftime("%Y%m%d%H%M%S")
 
     # 输出的格式：协议_时间_设备_位置_网站.pcap
-    output_name = f"{PROTOCAL_NAME}_{formatted_time}_{VPS_NAME}_{SITE_NAME}_{url.split("//")[-1]}.pcap"
+    output_name = f"{PROTOCAL_NAME}_{formatted_time}_{VPS_NAME}_{SITE_NAME}_{url.split('//')[-1]}.pcap"
     output_path = os.path.join(
         project_path, "data", "pcap", url.split("//")[-1], output_name
     )

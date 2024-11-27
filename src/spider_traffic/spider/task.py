@@ -22,6 +22,12 @@ class Task:
             self.urls = self.read_file()  # url的列表
             self.url_num = len(self.urls)
             self.requesturlNum = 0
+            # 如果文件不存在，创建并写入默认内容
+            if not os.path.exists(os.path.join(project_path, "config", "running.json")):
+                with open(
+                    os.path.join(project_path, "config", "running.json"), "w"
+                ) as f:
+                    json.dump({"currentIndex": 0}, f, indent=4)
             with open(os.path.join(project_path, "config", "running.json"), "r") as f:
                 params = json.load(f)
                 self.current_index = params["currentIndex"]

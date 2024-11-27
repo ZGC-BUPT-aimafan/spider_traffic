@@ -12,7 +12,7 @@ from spider_traffic.spider.task import task_instance
 
 
 def run_action_script():
-    command = ["python", "-m", "spider_traffic.action"]
+    command = ["../.venv/bin/python3", "-m", "spider_traffic.action"]
     # 使用 subprocess 运行 action.py
     subprocess.run(command)
 
@@ -24,9 +24,7 @@ def browser_action():
     while True:
         # 获取需要爬取的url目录
         xray_path = os.path.join(project_path, "bin", "Xray-linux-64", "xray")
-        config_path = os.path.join(
-            project_path, "data", "xray_config", "vultr1_vmess.json"
-        )
+        config_path = os.path.join(project_path, "config", "xray.json")
 
         while True:
             # 开xray

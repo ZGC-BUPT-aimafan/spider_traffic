@@ -31,7 +31,7 @@ def create_chrome_driver():
     # 创建 ChromeOptions 实例
     chrome_options = Options()
 
-    proxy_host_port = f"http://{config["proxy"]["host"]}:{config["proxy"]["port"]}"
+    proxy_host_port = f"http://{config['proxy']['host']}:{config['proxy']['port']}"
     chrome_options.add_argument("--headless")  # 无界面模式
     chrome_options.add_argument("--disable-gpu")  # 禁用 GPU 加速
     chrome_options.add_argument("--no-sandbox")  # 禁用沙盒
