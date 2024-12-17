@@ -78,7 +78,6 @@ def scroll_to_bottom(driver):
     is_continue = True
     while is_continue:
         times += 1
-
         delay = generate_normal_random() / times
         logger.info(f"加载等待延时: {delay}")
         time.sleep(delay)
@@ -94,11 +93,13 @@ def scroll_to_bottom(driver):
             )
         except:
             is_continue = False
+            break
 
         # 计算新的滚动高度并与最后的高度进行比较
         new_height = driver.execute_script("return document.body.scrollHeight")
         if new_height == last_height or times == 100:
             is_continue = False
+            break
         last_height = new_height
 
 

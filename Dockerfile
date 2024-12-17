@@ -1,4 +1,4 @@
-FROM ubuntu:24.04
+FROM 192.168.194.63:5000/ubuntu:latest
 
 # 设置工作目录
 WORKDIR /app
