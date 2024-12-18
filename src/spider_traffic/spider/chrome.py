@@ -31,7 +31,6 @@ def create_chrome_driver():
     # 创建 ChromeOptions 实例
     chrome_options = Options()
 
-    proxy_host_port = f"http://{config['proxy']['host']}:{config['proxy']['port']}"
     chrome_options.add_argument("--headless")  # 无界面模式
     chrome_options.add_argument("--disable-gpu")  # 禁用 GPU 加速
     chrome_options.add_argument("--no-sandbox")  # 禁用沙盒
@@ -44,7 +43,6 @@ def create_chrome_driver():
     chrome_options.add_argument(
         "--autoplay-policy=no-user-gesture-required"
     )  # 允许自动播放
-    chrome_options.add_argument(f"--proxy-server={proxy_host_port}")
 
     # 设置实验性首选项
     prefs = {

@@ -12,16 +12,12 @@ should_stop_capture = False
 
 
 def capture(output_path):
-    ip_addr = config["information"]["ip_addr"]
     # 设置tcpdump命令的参数
     tcpdump_command = [
         "tcpdump",
         "-i",
         "any",
         "-n",
-        "host",
-        ip_addr,
-        "and",
         "not",
         "port",
         "22",

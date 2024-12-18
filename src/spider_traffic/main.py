@@ -23,19 +23,7 @@ def browser_action():
     SITE_NAME = config["information"]["site"]
     while True:
         # 获取需要爬取的url目录
-        xray_path = os.path.join(project_path, "bin", "Xray-linux-64", "xray")
-        config_path = os.path.join(project_path, "config", "xray.json")
-
         while True:
-            # 开xray
-            # 后台运行并脱离主程序
-            process = subprocess.Popen(
-                [xray_path, "run", "--config", config_path],
-                stdin=subprocess.DEVNULL,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-            logger.info(f"开启Xray程序，加载配置文件{config_path}")
             time.sleep(5)
             # 开流量收集
             kill_chrome_processes()
@@ -63,14 +51,7 @@ def browser_action():
             except subprocess.TimeoutExpired:
                 traffic_process.kill()  # 如果进程没有在超时前退出，强制杀死进程
                 logger.info("强制杀死流量收集进程")
-            # 关xray
-            process.terminate()  # 尝试优雅地关闭进程
 
-            # 如果进程没有退出，使用kill强制终止
-            try:
-                process.wait(timeout=5)  # 等待进程退出，最多等5秒
-            except subprocess.TimeoutExpired:
-                process.kill()  # 如果进程没有在超时前退出，强制杀死进程
             logger.info(
                 f"第{str(task_instance.current_index)}个url爬取完成，爬取下一个url"
             )
