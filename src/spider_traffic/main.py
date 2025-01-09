@@ -53,6 +53,7 @@ def browser_action():
             time.sleep(60)
 
             time.sleep(5)
+
             # 关流量收集
             traffic_process.terminate()  # 尝试优雅地关闭进程
 
