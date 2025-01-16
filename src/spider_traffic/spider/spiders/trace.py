@@ -2,6 +2,7 @@ import random
 
 import scrapy
 
+from spider_traffic.myutils.config import config
 from spider_traffic.myutils.logger import logger
 
 # 导入 logger 模块
@@ -10,17 +11,13 @@ from spider_traffic.spider.task import task_instance
 
 class Spider(scrapy.Spider):
     name = "trace"
+
     allowed_domains = [task_instance.current_allowed_domain]
     start_urls = [task_instance.current_start_url]
 
     def parse(self, response):
         a_links = response.css("a::attr(href)").getall()
-        if len(a_links) == 0:
-            logger.info(f"{response.url} 没有提取到 URL")
-            yield response.follow(
-                task_instance.current_start_url, self.parse
-            )  # 重新开始遍历
-        random.shuffle(a_links)
+
         for link in a_links:
             # 拼接相对 URL 为绝对 URL
             full_url = response.urljoin(link)

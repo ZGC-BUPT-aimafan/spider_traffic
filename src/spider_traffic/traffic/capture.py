@@ -5,33 +5,50 @@ import time
 from datetime import datetime
 
 from spider_traffic.myutils import project_path
-from spider_traffic.myutils.config import config
+from spider_traffic.myutils.config import SPIDER_MODE, config
 from spider_traffic.myutils.logger import logger
 
 should_stop_capture = False
 
 
 def capture(output_path):
-    ip_addr = config["information"]["ip_addr"]
-    # 设置tcpdump命令的参数
-    tcpdump_command = [
-        "tcpdump",
-        "-i",
-        "any",
-        "-n",
-        "host",
-        ip_addr,
-        "and",
-        "not",
-        "port",
-        "22",
-        "and",
-        "not",
-        "port",
-        "80",
-        "-w",
-        output_path,  # 输出文件的路径
-    ]
+    if SPIDER_MODE == "xray":
+        ip_addr = config["information"]["ip_addr"]
+        # 设置tcpdump命令的参数
+        tcpdump_command = [
+            "tcpdump",
+            "-i",
+            "any",
+            "-n",
+            "host",
+            ip_addr,
+            "and",
+            "not",
+            "port",
+            "22",
+            "and",
+            "not",
+            "port",
+            "80",
+            "-w",
+            output_path,  # 输出文件的路径
+        ]
+    else:
+        tcpdump_command = [
+            "tcpdump",
+            "-i",
+            "any",
+            "-n",
+            "not",
+            "port",
+            "22",
+            "and",
+            "not",
+            "port",
+            "80",
+            "-w",
+            output_path,  # 输出文件的路径
+        ]
 
     process = subprocess.Popen(
         tcpdump_command,

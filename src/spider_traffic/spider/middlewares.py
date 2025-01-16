@@ -6,9 +6,11 @@
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter, is_item
 from scrapy import signals
+from scrapy.exceptions import IgnoreRequest
 from scrapy.http import HtmlResponse
 
-from spider_traffic.myutils.logger import logger
+from spider_traffic.myutils.config import config
+from spider_traffic.myutils.logger import logger, logger_url
 from spider_traffic.spider.chrome import create_chrome_driver, scroll_to_bottom
 from spider_traffic.spider.task import task_instance
 
@@ -74,6 +76,11 @@ class SpiderDownloaderMiddleware:
 
     def __init__(self):
         logger.info(f"创建浏览器驱动")
+        self.max_webnum = (
+            int(config["spider"]["webnum"])
+            if int(config["spider"]["webnum"]) != -1
+            else 999999
+        )
         self.browser = create_chrome_driver()
 
     def __del__(self):
@@ -90,10 +97,14 @@ class SpiderDownloaderMiddleware:
         # - or return a Request object
         # - or raise IgnoreRequest: process_exception() methods of
         #   installed downloader middleware will be called
-        logger.info(f"requestURL: {request.url}")
         task_instance.requesturlNum += 1
+        if task_instance.requesturlNum > self.max_webnum:
+            raise IgnoreRequest
+
         self.browser.get(request.url)
-        scroll_to_bottom(self.browser)
+        logger_url.info(f"{task_instance.current_start_url} : {request.url}")
+        if config["spider"]["scroll"].lower() == "true":
+            scroll_to_bottom(self.browser)
         return HtmlResponse(
             url=request.url,
             body=self.browser.page_source,

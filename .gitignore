@@ -13,3 +13,5 @@ bin/*
 !bin/.gitkeep
 config/xray.json
 src/auto_bushu/server_info.py
+config/*
+!config/.gitkeep

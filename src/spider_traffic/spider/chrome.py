@@ -11,15 +11,17 @@ from selenium.webdriver.support.ui import (
 )
 
 from spider_traffic.myutils import project_path
-from spider_traffic.myutils.config import config
+from spider_traffic.myutils.config import SPIDER_MODE, config
 from spider_traffic.myutils.logger import logger
 
 
-# 生成随机数的分布符合正态分布，均值为3，方差为10，若为负数取相反数
-def generate_normal_random(mean=3, variance=10):
+# 生成随机数的分布符合正态分布，均值为5，方差为10，若为负数取相反数
+def generate_normal_random(mean=5, variance=10):
     stddev = math.sqrt(variance)
     result = random.gauss(mean, stddev)
-    return result if result > 0 else -result
+    if abs(result) <= 2:
+        result = 2
+    return abs(result)
 
 
 def create_chrome_driver():
@@ -31,7 +33,10 @@ def create_chrome_driver():
     # 创建 ChromeOptions 实例
     chrome_options = Options()
 
-    proxy_host_port = f"http://{config['proxy']['host']}:{config['proxy']['port']}"
+    if SPIDER_MODE != "direct":
+        # 设置代理
+        proxy_host_port = f"http://{config['proxy']['host']}:{config['proxy']['port']}"
+        chrome_options.add_argument(f"--proxy-server={proxy_host_port}")
     chrome_options.add_argument("--headless")  # 无界面模式
     chrome_options.add_argument("--disable-gpu")  # 禁用 GPU 加速
     chrome_options.add_argument("--no-sandbox")  # 禁用沙盒
@@ -44,7 +49,6 @@ def create_chrome_driver():
     chrome_options.add_argument(
         "--autoplay-policy=no-user-gesture-required"
     )  # 允许自动播放
-    chrome_options.add_argument(f"--proxy-server={proxy_host_port}")
 
     # 设置实验性首选项
     prefs = {
@@ -92,14 +96,23 @@ def scroll_to_bottom(driver):
                 lambda d: d.execute_script("return document.body.scrollHeight")
                 > last_height
             )
-        except:
+        except Exception as e:
+            logger.info(f"下滑发生错误{e}")
             is_continue = False
 
         # 计算新的滚动高度并与最后的高度进行比较
         new_height = driver.execute_script("return document.body.scrollHeight")
-        if new_height == last_height or times == 100:
+        if new_height == last_height:
             is_continue = False
+
+        if times >= int(config["spider"]["scroll_num"]):
+            logger.info("达到最大下滑次数，停止下滑")
+            is_continue = False
+
         last_height = new_height
+    delay = generate_normal_random() / times
+    logger.info(f"加载等待延时: {delay}")
+    time.sleep(delay)
 
 
 def add_cookies(browser):
