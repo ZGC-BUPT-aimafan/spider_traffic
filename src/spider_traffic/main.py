@@ -11,8 +11,13 @@ from spider_traffic.myutils.logger import logger
 from spider_traffic.spider.task import task_instance
 
 
-def run_action_script():
-    command = ["../.venv/bin/python3", "-m", "spider_traffic.action"]
+def run_action_script(start_urls):
+    command = [
+        "../.venv/bin/python3",
+        "-m",
+        "spider_traffic.action",
+        " ".join(start_urls),
+    ]
     # 使用 subprocess 运行 action.py
     subprocess.run(command)
 
@@ -48,10 +53,11 @@ def browser_action():
                 time.sleep(5)
             # 开流量收集
             kill_chrome_processes()
-            traffic_process = traffic(
-                VPS_NAME, PROTOCAL_NAME, SITE_NAME, task_instance.current_start_url
+            start_urls = task_instance.current_start_url
+            traffic_process = traffic(VPS_NAME, PROTOCAL_NAME, SITE_NAME, start_urls)
+            action_thread = threading.Thread(
+                target=run_action_script, args=(start_urls,)
             )
-            action_thread = threading.Thread(target=run_action_script)
             # 启动线程
             action_thread.start()
             # 等待线程完成

@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 import threading
 from datetime import datetime
 from queue import Queue
@@ -25,11 +26,11 @@ def stop_crawlers_after_delay(process):
 
 
 # 启动爬虫
-def start_spider():
+def start_spider(start_urls):
     process = CrawlerProcess(get_project_settings())
     time_limit = int(config["spider"]["time_per_website"])
     # 添加你要运行的爬虫
-    process.crawl(Spider)
+    process.crawl(Spider, start_urls=start_urls)
 
     # 开启定时器
     timer_thread = threading.Timer(
@@ -38,7 +39,7 @@ def start_spider():
     timer_thread.daemon = True  # 设置为守护线程
     timer_thread.start()
 
-    logger.info(f"开始爬取数据，爬取时间设为{str(time_limit/60)}分钟")
+    logger.info(f"开始爬取数据，爬取时间设为{str(time_limit / 60)}分钟")
 
     # 启动爬虫
     process.start()
@@ -60,17 +61,18 @@ def kill_chrome_processes():
         print(f"Error occurred: {e.stderr.decode('utf-8')}")
 
 
-def traffic(VPS_NAME, PROTOCAL_NAME, SITE_NAME, url):
+def traffic(VPS_NAME, PROTOCAL_NAME, SITE_NAME, urls):
     # 获取当前时间
     current_time = datetime.now()
     # 格式化输出
     formatted_time = current_time.strftime("%Y%m%d%H%M%S")
 
     # 输出的格式：协议_时间_设备_位置_网站.pcap
-    output_name = f"{PROTOCAL_NAME}_{formatted_time}_{VPS_NAME}_{SITE_NAME}_{url.split('//')[-1]}.pcap"
-    output_path = os.path.join(
-        project_path, "data", "pcap", url.split("//")[-1], output_name
+    urls_name = "_".join([url.split("//")[-1] for url in urls])
+    output_name = (
+        f"{PROTOCAL_NAME}_{formatted_time}_{VPS_NAME}_{SITE_NAME}_{urls_name}.pcap"
     )
+    output_path = os.path.join(project_path, "data", "pcap", urls_name, output_name)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     traffic_process = capture(output_path)
@@ -79,4 +81,7 @@ def traffic(VPS_NAME, PROTOCAL_NAME, SITE_NAME, url):
 
 
 if __name__ == "__main__":
-    start_spider()
+    start_urls = sys.argv[1:][0]
+    start_urls = start_urls.split(" ")
+    logger.info(f"我现在要访问的网站包括{start_urls}")
+    start_spider(start_urls)

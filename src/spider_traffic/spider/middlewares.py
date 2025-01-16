@@ -98,11 +98,9 @@ class SpiderDownloaderMiddleware:
         # - or raise IgnoreRequest: process_exception() methods of
         #   installed downloader middleware will be called
         task_instance.requesturlNum += 1
-        if task_instance.requesturlNum > self.max_webnum:
-            raise IgnoreRequest
 
         self.browser.get(request.url)
-        logger_url.info(f"{task_instance.current_start_url} : {request.url}")
+        logger_url.info(f"{request.url}")
         if config["spider"]["scroll"].lower() == "true":
             scroll_to_bottom(self.browser)
         return HtmlResponse(

@@ -1,7 +1,9 @@
 import json
 import os
+import random
 
 from spider_traffic.myutils import project_path
+from spider_traffic.myutils.config import multisite_num
 
 
 class Task:
@@ -22,15 +24,6 @@ class Task:
             self.urls = self.read_file()  # url的列表
             self.url_num = len(self.urls)
             self.requesturlNum = 0
-            # 如果文件不存在，创建并写入默认内容
-            if not os.path.exists(os.path.join(project_path, "config", "running.json")):
-                with open(
-                    os.path.join(project_path, "config", "running.json"), "w"
-                ) as f:
-                    json.dump({"currentIndex": 0}, f, indent=4)
-            with open(os.path.join(project_path, "config", "running.json"), "r") as f:
-                params = json.load(f)
-                self.current_index = params["currentIndex"]
             with open(
                 os.path.join(project_path, "config", "exclude_keywords"), "r"
             ) as f:
@@ -49,13 +42,13 @@ class Task:
 
     @property  # 可以实现向属性一样访问方法
     def current_start_url(self):
-        url_str = self.urls[self.current_index]
-        return r"https://" + url_str
+        random_urls = random.sample(self.urls, multisite_num)
+        return [r"https://" + url for url in random_urls]
 
     @property
     def current_allowed_domain(self):
-        url_str = self.urls[self.current_index]
-        return url_str
+        random_urls = random.sample(self.urls, multisite_num)
+        return random_urls
 
 
 task_instance = Task()
