@@ -17,8 +17,6 @@ def capture(output_path):
         # 设置tcpdump命令的参数
         tcpdump_command = [
             "tcpdump",
-            "-i",
-            "any",
             "-n",
             "host",
             ip_addr,
@@ -36,8 +34,6 @@ def capture(output_path):
     else:
         tcpdump_command = [
             "tcpdump",
-            "-i",
-            "any",
             "-n",
             "not",
             "port",
