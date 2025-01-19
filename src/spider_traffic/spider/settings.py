@@ -23,7 +23,6 @@ USER_AGENT = (
     "Safari/537.36 Edg/131.0.6778.85"
 )
 
-
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = "spider (+http://www.yourdomain.com)"
 

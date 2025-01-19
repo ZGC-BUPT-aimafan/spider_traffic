@@ -4,15 +4,34 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 # useful for handling different item types with a single interface
-from itemadapter import ItemAdapter, is_item
+import json
+import os
+from datetime import datetime
+
 from scrapy import signals
-from scrapy.exceptions import IgnoreRequest
 from scrapy.http import HtmlResponse
 
+from spider_traffic.myutils import project_path
 from spider_traffic.myutils.config import config
 from spider_traffic.myutils.logger import logger, logger_url
 from spider_traffic.spider.chrome import create_chrome_driver, scroll_to_bottom
 from spider_traffic.spider.task import task_instance
+
+
+def append_dict_to_jsonl(data_dict):
+    """
+    将字典追加到 JSONL 文件中，如果文件不存在则创建。
+
+    :param data_dict: 要追加的字典
+    """
+    # 确保输入的数据是字典
+    if not isinstance(data_dict, dict):
+        raise ValueError("输入数据必须是字典类型")
+    file_path = os.path.join(project_path, "data", "urls_log.jsonl")
+    # 打开文件并以追加模式写入
+    with open(file_path, "a") as file:
+        # 将字典序列化为 JSON 格式并写入文件
+        file.write(json.dumps(data_dict, ensure_ascii=False) + "\n")
 
 
 class SpiderSpiderMiddleware:
@@ -85,6 +104,7 @@ class SpiderDownloaderMiddleware:
 
     def __del__(self):
         logger.info(f"关闭浏览器驱动")
+
         self.browser.close()
 
     def process_request(self, request, spider):
@@ -97,10 +117,27 @@ class SpiderDownloaderMiddleware:
         # - or return a Request object
         # - or raise IgnoreRequest: process_exception() methods of
         #   installed downloader middleware will be called
+        if spider.pcap_path not in task_instance.urls_log:
+            task_instance.urls_log[spider.pcap_path] = []
         task_instance.requesturlNum += 1
 
-        self.browser.get(request.url)
-        logger_url.info(f"{request.url}")
+        if task_instance.requesturlNum == 1:
+            self.browser.get(request.url)
+        else:
+            self.browser.execute_script("window.open('');")  # 打开新标签页
+            self.browser.switch_to.window(
+                self.browser.window_handles[-1]
+            )  # 切换到新标签页
+            self.browser.get(request.url)  # 访问新 URL
+        # 获取当前时间
+        now = datetime.now().strftime("%Y%m%d%H%M%S%f")[:-3]
+        task_instance.urls_log[spider.pcap_path].append([now, request.url])
+
+        # 格式化时间输出，格式为YYYYMMDDHHMMSSsss（精确到毫秒）
+
+        logger_url.info(f"{spider.pcap_path} : {request.url}")
+        if task_instance.requesturlNum == len(spider.start_urls):
+            append_dict_to_jsonl(task_instance.urls_log)
         if config["spider"]["scroll"].lower() == "true":
             scroll_to_bottom(self.browser)
         return HtmlResponse(

@@ -11,8 +11,9 @@ from spider_traffic.myutils.logger import logger
 class Spider(scrapy.Spider):
     name = "trace"
 
-    def __init__(self, start_urls=None, *args, **kwargs):
+    def __init__(self, start_urls=None, pcap_path=None, *args, **kwargs):
         super(Spider, self).__init__(*args, **kwargs)
+        self.pcap_path = pcap_path
         if start_urls:
             self.start_urls = start_urls
 

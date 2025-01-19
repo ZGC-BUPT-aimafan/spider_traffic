@@ -24,6 +24,7 @@ class Task:
             self.urls = self.read_file()  # url的列表
             self.url_num = len(self.urls)
             self.requesturlNum = 0
+            self.urls_log = {}
             with open(
                 os.path.join(project_path, "config", "exclude_keywords"), "r"
             ) as f:

@@ -26,11 +26,11 @@ def stop_crawlers_after_delay(process):
 
 
 # 启动爬虫
-def start_spider(start_urls):
+def start_spider(start_urls, pcap_path):
     process = CrawlerProcess(get_project_settings())
     time_limit = int(config["spider"]["time_per_website"])
     # 添加你要运行的爬虫
-    process.crawl(Spider, start_urls=start_urls)
+    process.crawl(Spider, start_urls=start_urls, pcap_path=pcap_path)
 
     # 开启定时器
     timer_thread = threading.Timer(
@@ -77,11 +77,13 @@ def traffic(VPS_NAME, PROTOCAL_NAME, SITE_NAME, urls):
 
     traffic_process = capture(output_path)
 
-    return traffic_process
+    return traffic_process, output_path
 
 
 if __name__ == "__main__":
-    start_urls = sys.argv[1:][0]
+    start_urls = sys.argv[1:-1][0]
+    pcap_path = sys.argv[-1]
     start_urls = start_urls.split(" ")
     logger.info(f"我现在要访问的网站包括{start_urls}")
-    start_spider(start_urls)
+
+    start_spider(start_urls, pcap_path)

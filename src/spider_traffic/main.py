@@ -11,12 +11,13 @@ from spider_traffic.myutils.logger import logger
 from spider_traffic.spider.task import task_instance
 
 
-def run_action_script(start_urls):
+def run_action_script(start_urls, output_path):
     command = [
         "../.venv/bin/python3",
         "-m",
         "spider_traffic.action",
         " ".join(start_urls),
+        output_path,
     ]
     # 使用 subprocess 运行 action.py
     subprocess.run(command)
@@ -40,6 +41,11 @@ def browser_action():
             config_path = os.path.join(project_path, "config", "xray.json")
 
         while True:
+            start_urls = task_instance.current_start_url
+            # 开流量收集
+            traffic_process, output_path = traffic(
+                VPS_NAME, PROTOCAL_NAME, SITE_NAME, start_urls
+            )
             # 开xray
             # 后台运行并脱离主程序
             if SPIDER_MODE == "xray":
@@ -51,12 +57,13 @@ def browser_action():
                 )
                 logger.info(f"开启Xray程序，加载配置文件{config_path}")
                 time.sleep(5)
-            # 开流量收集
             kill_chrome_processes()
-            start_urls = task_instance.current_start_url
-            traffic_process = traffic(VPS_NAME, PROTOCAL_NAME, SITE_NAME, start_urls)
             action_thread = threading.Thread(
-                target=run_action_script, args=(start_urls,)
+                target=run_action_script,
+                args=(
+                    start_urls,
+                    output_path,
+                ),
             )
             # 启动线程
             action_thread.start()
@@ -69,6 +76,16 @@ def browser_action():
             time.sleep(30)
             logger.info("等待流量结束")
 
+            if SPIDER_MODE == "xray":
+                # 关xray
+                xray_process.terminate()  # 尝试优雅地关闭进程
+
+                # 如果进程没有退出，使用kill强制终止
+                try:
+                    xray_process.wait(timeout=5)  # 等待进程退出，最多等5秒
+                except subprocess.TimeoutExpired:
+                    xray_process.kill()  # 如果进程没有在超时前退出，强制杀死进程
+
             # 关流量收集
             traffic_process.terminate()  # 尝试优雅地关闭进程
 
@@ -79,24 +96,6 @@ def browser_action():
             except subprocess.TimeoutExpired:
                 traffic_process.kill()  # 如果进程没有在超时前退出，强制杀死进程
                 logger.info("强制杀死流量收集进程")
-            if SPIDER_MODE == "xray":
-                # 关xray
-                xray_process.terminate()  # 尝试优雅地关闭进程
-
-                # 如果进程没有退出，使用kill强制终止
-                try:
-                    xray_process.wait(timeout=5)  # 等待进程退出，最多等5秒
-                except subprocess.TimeoutExpired:
-                    xray_process.kill()  # 如果进程没有在超时前退出，强制杀死进程
-            logger.info(
-                f"第{str(task_instance.current_index)}个url爬取完成，爬取下一个url"
-            )
-            task_instance.current_index = (
-                task_instance.current_index + 1
-            ) % task_instance.url_num
-            running_path = os.path.join(project_path, "config", "running.json")
-            with open(running_path, "w") as f:
-                json.dump({"currentIndex": task_instance.current_index}, f)
 
 
 if __name__ == "__main__":
