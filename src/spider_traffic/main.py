@@ -35,6 +35,11 @@ def browser_action():
             config_path = os.path.join(project_path, "config", "xray.json")
 
         while True:
+            # 开流量收集
+            kill_chrome_processes()
+            traffic_process = traffic(
+                VPS_NAME, PROTOCAL_NAME, SITE_NAME, task_instance.current_start_url
+            )
             # 开xray
             # 后台运行并脱离主程序
             if SPIDER_MODE == "xray":
@@ -46,11 +51,6 @@ def browser_action():
                 )
                 logger.info(f"开启Xray程序，加载配置文件{config_path}")
                 time.sleep(5)
-            # 开流量收集
-            kill_chrome_processes()
-            traffic_process = traffic(
-                VPS_NAME, PROTOCAL_NAME, SITE_NAME, task_instance.current_start_url
-            )
             action_thread = threading.Thread(target=run_action_script)
             # 启动线程
             action_thread.start()
@@ -63,6 +63,15 @@ def browser_action():
             time.sleep(30)
             logger.info("等待流量结束")
 
+            if SPIDER_MODE == "xray":
+                # 关xray
+                xray_process.terminate()  # 尝试优雅地关闭进程
+
+                # 如果进程没有退出，使用kill强制终止
+                try:
+                    xray_process.wait(timeout=5)  # 等待进程退出，最多等5秒
+                except subprocess.TimeoutExpired:
+                    xray_process.kill()  # 如果进程没有在超时前退出，强制杀死进程
             # 关流量收集
             traffic_process.terminate()  # 尝试优雅地关闭进程
 
@@ -73,15 +82,6 @@ def browser_action():
             except subprocess.TimeoutExpired:
                 traffic_process.kill()  # 如果进程没有在超时前退出，强制杀死进程
                 logger.info("强制杀死流量收集进程")
-            if SPIDER_MODE == "xray":
-                # 关xray
-                xray_process.terminate()  # 尝试优雅地关闭进程
-
-                # 如果进程没有退出，使用kill强制终止
-                try:
-                    xray_process.wait(timeout=5)  # 等待进程退出，最多等5秒
-                except subprocess.TimeoutExpired:
-                    xray_process.kill()  # 如果进程没有在超时前退出，强制杀死进程
             logger.info(
                 f"第{str(task_instance.current_index)}个url爬取完成，爬取下一个url"
             )
