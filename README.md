@@ -5,7 +5,9 @@
 
 ## 构建 Docker 镜像
 
-在开始使用之前，首先需要构建Docker镜像。执行以下命令来构建镜像：
+在开始使用之前，首先需要构建Docker镜像。在有`dockerfile`的目录下执行以下命令来构建镜像（对应不同的操作系统、以及相同操作系统的不同版本有不同的`dockerfile`，默认为`ubuntu24`，其中`dockerfiles`目录中有`ubuntu20、debian12`版本的操作系统，如有需要可以将其替换为`spider_traffic`目录下的`dockerfile`）：
+> 注意！！
+> 如果安装的是`ubuntu20`，那么还需要在创建镜像之前将`requirements.txt`文件进行修改，可替换为`requirements`文件夹中的`requirements_ubuntu20.txt`，`txt`文件名保持和`spider_traffic`中一致的文件名；
 
 ```bash
 docker build -t aimafan/spider_traffic:v1 .
