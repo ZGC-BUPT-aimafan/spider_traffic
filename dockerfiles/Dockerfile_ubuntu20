@@ -75,6 +75,7 @@ RUN sudo apt install -y \
     libxfixes3  \
     libxkbcommon0   \
     libxrandr2  \
+    libevent-dev \
     xdg-utils   
 RUN sudo apt install -y libasound2
 RUN sudo dpkg -i bin/google-chrome-stable_current_amd64.deb
