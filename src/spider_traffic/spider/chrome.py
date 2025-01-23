@@ -33,10 +33,17 @@ def create_chrome_driver():
     # 创建 ChromeOptions 实例
     chrome_options = Options()
 
-    if SPIDER_MODE != "direct":
+    if SPIDER_MODE == "xray":
         # 设置代理
         proxy_host_port = f"http://{config['proxy']['host']}:{config['proxy']['port']}"
         chrome_options.add_argument(f"--proxy-server={proxy_host_port}")
+    elif SPIDER_MODE == "tor":
+        # 设置代理
+        proxy_host_port = (
+            f"socks5h://{config['proxy']['host']}:{config['proxy']['port']}"
+        )
+        chrome_options.add_argument(f"--proxy-server={proxy_host_port}")
+
     chrome_options.add_argument("--headless")  # 无界面模式
     chrome_options.add_argument("--disable-gpu")  # 禁用 GPU 加速
     chrome_options.add_argument("--no-sandbox")  # 禁用沙盒

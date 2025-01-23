@@ -38,7 +38,7 @@ def start_spider():
     timer_thread.daemon = True  # 设置为守护线程
     timer_thread.start()
 
-    logger.info(f"开始爬取数据，爬取时间设为{str(time_limit/60)}分钟")
+    logger.info(f"开始爬取数据，爬取时间设为{str(time_limit / 60)}分钟")
 
     # 启动爬虫
     process.start()
