@@ -1,0 +1,17 @@
+ControlPort 2700
+SocksPort 9050
+DataDirectory /app/torData/tor_webtunnel
+Log notice file /app/logs/notice_webtunnel.log
+
+SafeLogging 0
+RunAsDaemon 0
+
+LogTimeGranularity 1
+
+UseBridges 1
+ClientTransportPlugin webtunnel exec /app/bin/tor_s/webtunnelClient
+
+Bridge webtunnel 99.121.60.23:443 3BDD7036FAC9CC81ADBA39E88637D5EF87350F1C url=https://speedtest.qs.ee/dI6HDfnDLSUiFV0MaLMEtcmv ver=0.0.1
+
+
+

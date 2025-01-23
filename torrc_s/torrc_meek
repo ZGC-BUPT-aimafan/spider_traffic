@@ -1,0 +1,13 @@
+ControlPort 2700
+SocksPort 9050
+DataDirectory /app/torData/tor_meek
+Log notice file /app/logs/notice_meek.log
+SafeLogging 0
+RunAsDaemon 0
+
+LogTimeGranularity 1
+
+UseBridges 1
+ClientTransportPlugin meek exec /app/bin/tor_s/meek-client
+
+Bridge meek 0.0.2.0:3 url=https://meek.azureedge.net/ front=ajax.aspnetcdn.com

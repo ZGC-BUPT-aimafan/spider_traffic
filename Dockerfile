@@ -1,4 +1,4 @@
-FROM 192.168.194.63:5000/ubuntu:latest
+FROM ubuntu:latest
 
 # 设置工作目录
 WORKDIR /app
@@ -65,12 +65,13 @@ RUN sudo apt install -y \
     libxfixes3  \
     libxkbcommon0   \
     libxrandr2  \
+    libevent-dev \
     xdg-utils   
 RUN sudo apt install -y libasound2t64
-RUN sudo dpkg -i bin/google-chrome-stable_current_amd64.deb
-RUN sudo apt install -f
-RUN sudo dpkg -i bin/google-chrome-stable_current_amd64.deb
-RUN sudo mv bin/chromedriver-linux64/chromedriver /usr/bin
+#RUN sudo dpkg -i bin/google-chrome-stable_current_amd64.deb
+#RUN sudo apt install -f
+#RUN sudo dpkg -i bin/google-chrome-stable_current_amd64.deb
+#RUN sudo mv bin/chromedriver-linux64/chromedriver /usr/bin
 
 
 # 默认命令，打开vim
