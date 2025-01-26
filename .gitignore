@@ -10,6 +10,10 @@ data/*
 .DS_Store
 init_program.sh
 .venv
+<<<<<<< HEAD
+=======
+
+>>>>>>> master
 !bin/.gitkeep
 config/xray.json
 src/auto_bushu/server_info.py
