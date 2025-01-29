@@ -12,8 +12,8 @@ from spider_traffic.spider.task import task_instance
 from spider_traffic.torDo import close_tor, start_tor
 
 
-def run_action_script():
-    command = ["../.venv/bin/python3", "-m", "spider_traffic.action"]
+def run_action_script(traffic_path):
+    command = ["../.venv/bin/python3", "-m", "spider_traffic.action", traffic_path]
     # 使用 subprocess 运行 action.py
     subprocess.run(command)
 
@@ -39,7 +39,7 @@ def browser_action():
         def begin():
             # 开流量收集
             kill_chrome_processes()
-            traffic_process = traffic(
+            traffic_process, traffic_path = traffic(
                 VPS_NAME, PROTOCAL_NAME, SITE_NAME, task_instance.current_start_url
             )
             # 开xray
@@ -52,22 +52,17 @@ def browser_action():
                     stderr=subprocess.DEVNULL,
                 )
                 logger.info(f"开启Xray程序，加载配置文件{config_path}")
-                return traffic_process, proxy_process, True
+                return traffic_process, proxy_process, True, traffic_path
 
             elif SPIDER_MODE == "tor":
-                for i in range(3):
-                    proxy_process, result = start_tor()
-                    if result is True:
-                        break
-                    close_tor(proxy_process)
-                    time.sleep(10)
+                proxy_process, result = start_tor()
 
-                return traffic_process, proxy_process, result
+                return traffic_process, proxy_process, result, traffic_path
 
             else:
-                return traffic_process, None, True
+                return traffic_process, None, True, traffic_path
 
-        def stop(traffic_process, proxy_process):
+        def stop(traffic_process, proxy_process, traffic_path, result=True):
             if SPIDER_MODE == "xray":
                 # 关xray
                 proxy_process.terminate()  # 尝试优雅地关闭进程
@@ -79,6 +74,7 @@ def browser_action():
                     proxy_process.kill()  # 如果进程没有在超时前退出，强制杀死进程
             elif SPIDER_MODE == "tor":
                 close_tor(proxy_process)
+
             # 关流量收集
             traffic_process.terminate()  # 尝试优雅地关闭进程
 
@@ -89,12 +85,20 @@ def browser_action():
             except subprocess.TimeoutExpired:
                 traffic_process.kill()  # 如果进程没有在超时前退出，强制杀死进程
                 logger.info("强制杀死流量收集进程")
+            if SPIDER_MODE == "tor" and result is not True:
+                if os.path.exists(traffic_path):
+                    os.remove(traffic_path)
 
-        traffic_process, proxy_process, result = begin()
+        traffic_process, proxy_process, result, traffic_path = begin()
         if result is False:
-            stop(traffic_process, proxy_process)
+            stop(traffic_process, proxy_process, traffic_path, False)
+            continue
 
-        action_thread = threading.Thread(target=run_action_script)
+        if SPIDER_MODE == "tor":
+            logger.info("等待tor网络稳定")
+            time.sleep(60)
+
+        action_thread = threading.Thread(target=run_action_script, args=(traffic_path,))
         # 启动线程
         action_thread.start()
         # 等待线程完成
@@ -106,7 +110,7 @@ def browser_action():
         time.sleep(30)
         logger.info("等待流量结束")
 
-        stop(traffic_process, proxy_process)
+        stop(traffic_process, proxy_process, traffic_path, True)
 
         logger.info(f"第{str(task_instance.current_index)}个url爬取完成，爬取下一个url")
         task_instance.current_index = (

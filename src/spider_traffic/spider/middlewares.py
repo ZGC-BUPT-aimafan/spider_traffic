@@ -4,11 +4,14 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 # useful for handling different item types with a single interface
+import os
+
 from itemadapter import ItemAdapter, is_item
 from scrapy import signals
 from scrapy.exceptions import IgnoreRequest
 from scrapy.http import HtmlResponse
 
+from spider_traffic.myutils import project_path
 from spider_traffic.myutils.config import config
 from spider_traffic.myutils.logger import logger, logger_url
 from spider_traffic.spider.chrome import create_chrome_driver, scroll_to_bottom
@@ -105,6 +108,16 @@ class SpiderDownloaderMiddleware:
         logger_url.info(f"{task_instance.current_start_url} : {request.url}")
         if config["spider"]["scroll"].lower() == "true":
             scroll_to_bottom(self.browser)
+
+        # 每次截个图，看看网站是否正常访问
+        screenshot_dir = os.path.join(
+            project_path, "data", "screenshot", request.url.split("://")[-1]
+        )
+        os.makedirs(screenshot_dir, exist_ok=True)
+        pcap_name = os.path.basename(spider.pcap_path)
+        screenshot_path = os.path.join(screenshot_dir, f"{pcap_name}.png")
+        self.browser.save_screenshot(screenshot_path)
+
         return HtmlResponse(
             url=request.url,
             body=self.browser.page_source,

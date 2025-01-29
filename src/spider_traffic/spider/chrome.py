@@ -40,7 +40,7 @@ def create_chrome_driver():
     elif SPIDER_MODE == "tor":
         # 设置代理
         proxy_host_port = (
-            f"socks5h://{config['proxy']['host']}:{config['proxy']['port']}"
+            f"socks5://{config['proxy']['host']}:{config['proxy']['port']}"
         )
         chrome_options.add_argument(f"--proxy-server={proxy_host_port}")
 
