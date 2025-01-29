@@ -15,6 +15,10 @@ class Spider(scrapy.Spider):
     allowed_domains = [task_instance.current_allowed_domain]
     start_urls = [task_instance.current_start_url]
 
+    def __init__(self, pcap_path=None, *args, **kwargs):
+        super(Spider, self).__init__(*args, **kwargs)
+        self.pcap_path = pcap_path
+
     def parse(self, response):
         a_links = response.css("a::attr(href)").getall()
 
