@@ -140,6 +140,16 @@ class SpiderDownloaderMiddleware:
             append_dict_to_jsonl(task_instance.urls_log)
         if config["spider"]["scroll"].lower() == "true":
             scroll_to_bottom(self.browser)
+
+        # 每次截个图，看看网站是否正常访问
+        screenshot_dir = os.path.join(
+            project_path, "data", "screenshot", request.url.split("://")[-1]
+        )
+        os.makedirs(screenshot_dir, exist_ok=True)
+        pcap_name = os.path.basename(spider.pcap_path)
+        screenshot_path = os.path.join(screenshot_dir, f"{pcap_name}.png")
+        self.browser.save_screenshot(screenshot_path)
+
         return HtmlResponse(
             url=request.url,
             body=self.browser.page_source,

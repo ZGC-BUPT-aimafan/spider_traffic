@@ -17,5 +17,9 @@ class Spider(scrapy.Spider):
         if start_urls:
             self.start_urls = start_urls
 
+    def __init__(self, pcap_path=None, *args, **kwargs):
+        super(Spider, self).__init__(*args, **kwargs)
+        self.pcap_path = pcap_path
+
     def parse(self, response):
         pass
